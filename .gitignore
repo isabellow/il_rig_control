@@ -1,0 +1,6 @@
+__pycache__
+*.aux
+*.log
+
+cameras/ffmpeg.exe
+.ipynb_checkpoints/
