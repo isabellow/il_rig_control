@@ -1,0 +1,9 @@
+side camera settings:
+	size: 4096x1300
+ 	framerate: 49.99
+	pixel format: gray8 (temporary until we figure out how to use BayerRG8)
+
+bottom camera settings:
+	size: 1600x1600
+ 	framerate: 25
+	pixel format: gray8 (temporary until we figure out how to use BayerRG8)	
