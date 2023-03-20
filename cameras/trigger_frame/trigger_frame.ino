@@ -6,7 +6,7 @@ const int topTrigPin = 2; // to send frame triggers to the side and top cameras
 const int botTrigPin = 3; // to send frame triggers to the bottom camera
 const unsigned int topTrigDelay = 10000; //half-delay in microseconds btw frames (10000 is 50hz)
 
-// to run bottom camera at half speed
+// run bottom camera at half speed
 const int botTrigRateMod = 2; 
 int botTrigModCnt = 0;
 

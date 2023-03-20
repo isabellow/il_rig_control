@@ -11,7 +11,8 @@
     <Nodes>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="spk:SpinnakerCapture">
-          <spk:Index>0</spk:Index>
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637872</spk:SerialNumber>
           <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
         </Combinator>
       </Expression>
@@ -111,7 +112,7 @@ def process(path):
     -qp : 
   '''
 
-  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 30 -pix_fmt bayer_rggb8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname))  
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1600x1600 -r 25 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname))  
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 2048x2048 -r 30 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 18 {1}', pipename, fname)) # SC bottom cam
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 2800x1400 -r 60 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 18 {1}',pipename,fname))
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 2048x2048 -r 30 -pix_fmt gray8 -i {0} -vcodec libx264 -preset medium -crf 18 {1}',pipename,fname))
