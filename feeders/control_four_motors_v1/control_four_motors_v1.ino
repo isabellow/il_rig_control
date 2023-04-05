@@ -73,19 +73,19 @@ void resetEDPins()
 void toggle_all()
 {
   Serial.println("Toggle all");
-  digitalWrite(dir1, !digitalRead(dir1));
+  digitalWrite(dir1, !digitalRead(dir1)); // Reverse direction each toggle
   digitalWrite(dir2, !digitalRead(dir1));
   digitalWrite(dir3, !digitalRead(dir1));
   digitalWrite(dir4, !digitalRead(dir1));
   delay(1);
   for(x=0; x<stepsPerRot; x++)  // Step until toggle is complete
   {
-    digitalWrite(stp1,HIGH); //Trigger one step
+    digitalWrite(stp1,HIGH); // Trigger one step
     digitalWrite(stp2,HIGH);
     digitalWrite(stp3,HIGH);
     digitalWrite(stp4,HIGH);
     delay(betweenStepsMillis);
-    digitalWrite(stp1,LOW); //Pull step pin low so it can be triggered again
+    digitalWrite(stp1,LOW); // Pull step pin low so it can be triggered again
     digitalWrite(stp2,LOW);
     digitalWrite(stp3,LOW);
     digitalWrite(stp4,LOW);
