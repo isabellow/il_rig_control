@@ -14,7 +14,7 @@ int user_input;
 int x;
 int stepsPerRot = 4200;                 // how far to turn for each toggle
 const int pulseWidthMicros = 30;        // 30 (us)
-const int betweenStepsMillis = 2 ;      // pause time
+const int betweenStepsMillis = 1;      // pause time
 
 void setup() {
   // pins 2-9 should be output
@@ -84,7 +84,7 @@ void toggle_all()
     digitalWrite(stp2,HIGH);
     digitalWrite(stp3,HIGH);
     digitalWrite(stp4,HIGH);
-    delay(betweenStepsMillis);
+    delayMicroseconds(pulseWidthMicros);
     digitalWrite(stp1,LOW); // Pull step pin low so it can be triggered again
     digitalWrite(stp2,LOW);
     digitalWrite(stp3,LOW);
