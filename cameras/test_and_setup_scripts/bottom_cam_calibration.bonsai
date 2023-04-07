@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WorkflowBuilder Version="2.7.1"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
+                 xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
+                 xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
+                 xmlns="https://bonsai-rx.org/2018/workflow">
+  <Workflow>
+    <Nodes>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637872</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Slice">
+          <rx:Start>0</rx:Start>
+          <rx:Step>50</rx:Step>
+          <rx:Stop xsi:nil="true" />
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>Z:\Isabel\data\acquisition\bot_calibration\.tiff</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:SaveImage">
+          <cv:FileName>Z:\Isabel\data\acquisition\bot_calibration\.tiff</cv:FileName>
+          <cv:Suffix>Timestamp</cv:Suffix>
+        </Combinator>
+      </Expression>
+    </Nodes>
+    <Edges>
+      <Edge From="0" To="1" Label="Source1" />
+      <Edge From="1" To="2" Label="Source1" />
+      <Edge From="2" To="5" Label="Source1" />
+      <Edge From="3" To="4" Label="Source1" />
+      <Edge From="4" To="5" Label="Source2" />
+    </Edges>
+  </Workflow>
+</WorkflowBuilder>
