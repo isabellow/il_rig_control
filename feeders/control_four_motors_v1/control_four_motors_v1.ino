@@ -14,7 +14,7 @@ int user_input;
 int x;
 int stepsPerRot = 4200;                 // how far to turn for each toggle
 const int pulseWidthMicros = 30;        // 30 (us)
-const int betweenStepsMillis = 0.5;      // pause time - impacts toggle speed
+const int betweenStepsMicros = 240;      // pause time = ~1s per toggle
 
 void setup() {
   // pins 2-9 should be output
@@ -89,7 +89,7 @@ void toggle_all()
     digitalWrite(stp2,LOW);
     digitalWrite(stp3,LOW);
     digitalWrite(stp4,LOW);
-    delay(betweenStepsMillis);
+    delayMicroseconds(betweenStepsMicros);
   }
 }
 
@@ -102,7 +102,7 @@ void toggle1()
     digitalWrite(stp1,HIGH); // Trigger one step forward
     delayMicroseconds(pulseWidthMicros);
     digitalWrite(stp1,LOW); // Pull step pin low so it can be triggered again
-    delay(betweenStepsMillis);
+    delayMicroseconds(betweenStepsMicros);
   }
 }
 
@@ -115,7 +115,7 @@ void toggle2()
     digitalWrite(stp2,HIGH); // Trigger one step forward
     delayMicroseconds(pulseWidthMicros);
     digitalWrite(stp2,LOW); // Pull step pin low so it can be triggered again
-    delay(betweenStepsMillis);
+    delayMicroseconds(betweenStepsMicros);
   }
 }
 
@@ -128,7 +128,7 @@ void toggle3()
     digitalWrite(stp3,HIGH); // Trigger one step forward
     delayMicroseconds(pulseWidthMicros);
     digitalWrite(stp3,LOW); // Pull step pin low so it can be triggered again
-    delay(betweenStepsMillis);
+    delayMicroseconds(betweenStepsMicros);
   }
 }
 
@@ -141,6 +141,6 @@ void toggle4()
     digitalWrite(stp4,HIGH); // Trigger one step forward
     delayMicroseconds(pulseWidthMicros);
     digitalWrite(stp4,LOW); // Pull step pin low so it can be triggered again
-    delay(betweenStepsMillis);
+    delayMicroseconds(betweenStepsMicros);
   }
 }
