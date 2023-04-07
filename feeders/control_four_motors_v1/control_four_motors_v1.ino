@@ -14,7 +14,7 @@ int user_input;
 int x;
 int stepsPerRot = 4200;                 // how far to turn for each toggle
 const int pulseWidthMicros = 30;        // 30 (us)
-const int betweenStepsMillis = 1;      // pause time
+const int betweenStepsMillis = 0.5;      // pause time - impacts toggle speed
 
 void setup() {
   // pins 2-9 should be output
