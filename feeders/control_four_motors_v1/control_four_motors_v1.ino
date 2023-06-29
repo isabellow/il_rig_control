@@ -74,9 +74,9 @@ void toggle_all()
 {
   Serial.println("Toggle all");
   digitalWrite(dir1, !digitalRead(dir1)); // Reverse direction each toggle
-  digitalWrite(dir2, !digitalRead(dir1));
-  digitalWrite(dir3, !digitalRead(dir1));
-  digitalWrite(dir4, !digitalRead(dir1));
+  digitalWrite(dir2, !digitalRead(dir2));
+  digitalWrite(dir3, !digitalRead(dir3));
+  digitalWrite(dir4, !digitalRead(dir4));
   delay(1);
   for(x=0; x<stepsPerRot; x++)  // Step until toggle is complete
   {
