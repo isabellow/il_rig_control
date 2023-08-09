@@ -1,0 +1,31 @@
+clear all,clc,
+
+% translation vector
+d = sqrt(2); % normalized distance of each camera from the arena center
+h = 1/2; % height of each camera above the arena
+cam_trans = [0, h, d];
+
+% define a set of points in world coords that are easy to translate
+% into camera coords
+% these are the corners ordered red, yellow, green, blue
+% plus a point camera height above the arena center
+world_pts = cat(1, [1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0], [0, 0, h]);
+
+% find the camera coords of the points for the camera in each corner
+red_pts = cat(1, [0, h, 0], [-d, h, d], [0, h, 2*d], [d, h, d], [0, 0, d]);
+yellow_pts = cat(1, [d, h, d], [0, h, 0], [-d, h, d], [0, h, 2*d], [0, 0, d]);
+green_pts = cat(1, [0, h, 2*d], [d, h, d], [0, h, 0], [-d, h, d], [0, 0, d]);
+blue_pts = cat(1, [-d, h, d], [0, h, 2*d], [d, h, d], [0, h, 0], [0, 0, d]);
+
+tlPoints = cat(1, [1, d/2, d/2], [-1, d/2, d/2], [-1, -d/2, 3*d/2], [1, -d/2, 3*d/2], [0, -d/2, d/2]);
+trPoints = cat(1, [-1, -d/2, 3*d/2], [1, -d/2, 3*d/2], [1, d/2, d/2], [-1, d/2, d/2], [0, -d/2, d/2]);
+
+flRot = mldivide(world_pts, red_pts-cam_trans);
+blRot = mldivide(world_pts, yellow_pts-cam_trans);
+brRot = mldivide(world_pts, green_pts-cam_trans);
+frRot = mldivide(world_pts, blue_pts-cam_trans);
+
+tlRot = mldivide(worldPoints_top, tlPoints-top_cam_trans);
+trRot = mldivide(worldPoints_top, trPoints-top_cam_trans);
+
+rotationMatrixToVector(flRot),
