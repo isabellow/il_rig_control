@@ -69,7 +69,7 @@
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="cv:SaveImage">
-          <cv:FileName>Z:\Isabel\data\acquisition\test_two_side\botImages\.tiff</cv:FileName>
+          <cv:FileName>Z:\Isabel\data\acquisition\test_gpu\botImages\.tiff</cv:FileName>
           <cv:Suffix>Timestamp</cv:Suffix>
         </Combinator>
       </Expression>
@@ -86,7 +86,7 @@
         <Combinator xsi:type="rx:Zip" />
       </Expression>
       <Expression xsi:type="io:CsvWriter">
-        <io:FileName>Z:\Isabel\data\acquisition\test_two_side\bottom_cam_sync.csv</io:FileName>
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\bottom_cam_sync.csv</io:FileName>
         <io:Append>false</io:Append>
         <io:Overwrite>false</io:Overwrite>
         <io:Suffix>None</io:Suffix>
@@ -131,7 +131,8 @@ def process(path):
   pipename = r'\\.\pipe\bottom_video'
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1600x1600 -r 25 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
-  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 800x800 -r 25 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 800x800 -r 25 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 800x800 -r 25 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 34 {1}', pipename, fname))
   return True</ipy:Script>
       </Expression>
       <Expression xsi:type="Combinator">
@@ -181,7 +182,7 @@ def process(path):
         </PropertyMappings>
       </Expression>
       <Expression xsi:type="io:CsvWriter">
-        <io:FileName>Z:\Isabel\data\acquisition\test_two_side\red_cam_sync.csv</io:FileName>
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\red_cam_sync.csv</io:FileName>
         <io:Append>false</io:Append>
         <io:Overwrite>false</io:Overwrite>
         <io:Suffix>None</io:Suffix>
@@ -206,7 +207,7 @@ def process(path):
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
-  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 23 {1}', pipename, fname)) # attempt at gpu
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
   return True</ipy:Script>
       </Expression>
       <Expression xsi:type="Combinator">
@@ -256,7 +257,7 @@ def process(path):
         </PropertyMappings>
       </Expression>
       <Expression xsi:type="io:CsvWriter">
-        <io:FileName>Z:\Isabel\data\acquisition\test_two_side\blue_cam_sync.csv</io:FileName>
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\blue_cam_sync.csv</io:FileName>
         <io:Append>false</io:Append>
         <io:Overwrite>false</io:Overwrite>
         <io:Suffix>None</io:Suffix>
@@ -280,8 +281,158 @@ def process(path):
   pipename = r'\\.\pipe\blue_video'
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
   #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
-  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
-  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x624 -r 50 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 23 {1}', pipename, fname)) # attempt at gpu
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
+  return True</ipy:Script>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637874</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:ImageWriter">
+          <cv:Path>\\.\pipe\green_video</cv:Path>
+          <cv:Suffix>None</cv:Suffix>
+          <cv:Overwrite>true</cv:Overwrite>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>ChunkData</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>FrameID</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Timestamp</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\green_cam_sync.csv</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="io:CsvWriter">
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\green_cam_sync.csv</io:FileName>
+        <io:Append>false</io:Append>
+        <io:Overwrite>false</io:Overwrite>
+        <io:Suffix>None</io:Suffix>
+        <io:IncludeHeader>false</io:IncludeHeader>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT1S</rx:DueTime>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Name>SaveGreenVideo</ipy:Name>
+        <ipy:Script>import os
+
+@returns(bool)
+def process(path):
+  fname = os.path.join(path, "green_cam.avi")
+  pipename = r'\\.\pipe\green_video'
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
+  return True</ipy:Script>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637871</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:ImageWriter">
+          <cv:Path>\\.\pipe\yellow_video</cv:Path>
+          <cv:Suffix>None</cv:Suffix>
+          <cv:Overwrite>true</cv:Overwrite>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>ChunkData</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>FrameID</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Timestamp</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\yellow_cam_sync.csv</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="io:CsvWriter">
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\yellow_cam_sync.csv</io:FileName>
+        <io:Append>false</io:Append>
+        <io:Overwrite>false</io:Overwrite>
+        <io:Suffix>None</io:Suffix>
+        <io:IncludeHeader>false</io:IncludeHeader>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT1S</rx:DueTime>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Name>SaveYellowVideo</ipy:Name>
+        <ipy:Script>import os
+
+@returns(bool)
+def process(path):
+  fname = os.path.join(path, "yellow_cam.avi")
+  pipename = r'\\.\pipe\yellow_video'
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
   return True</ipy:Script>
       </Expression>
     </Nodes>
@@ -340,6 +491,36 @@ def process(path):
       <Edge From="53" To="54" Label="Source2" />
       <Edge From="55" To="56" Label="Source1" />
       <Edge From="56" To="57" Label="Source1" />
+      <Edge From="58" To="59" Label="Source1" />
+      <Edge From="58" To="61" Label="Source1" />
+      <Edge From="59" To="60" Label="Source1" />
+      <Edge From="61" To="62" Label="Source1" />
+      <Edge From="61" To="63" Label="Source1" />
+      <Edge From="62" To="64" Label="Source1" />
+      <Edge From="63" To="64" Label="Source2" />
+      <Edge From="64" To="70" Label="Source1" />
+      <Edge From="65" To="67" Label="Source2" />
+      <Edge From="66" To="67" Label="Source1" />
+      <Edge From="67" To="68" Label="Source1" />
+      <Edge From="68" To="69" Label="Source1" />
+      <Edge From="69" To="70" Label="Source2" />
+      <Edge From="71" To="72" Label="Source1" />
+      <Edge From="72" To="73" Label="Source1" />
+      <Edge From="74" To="75" Label="Source1" />
+      <Edge From="74" To="77" Label="Source1" />
+      <Edge From="75" To="76" Label="Source1" />
+      <Edge From="77" To="78" Label="Source1" />
+      <Edge From="77" To="79" Label="Source1" />
+      <Edge From="78" To="80" Label="Source1" />
+      <Edge From="79" To="80" Label="Source2" />
+      <Edge From="80" To="86" Label="Source1" />
+      <Edge From="81" To="83" Label="Source2" />
+      <Edge From="82" To="83" Label="Source1" />
+      <Edge From="83" To="84" Label="Source1" />
+      <Edge From="84" To="85" Label="Source1" />
+      <Edge From="85" To="86" Label="Source2" />
+      <Edge From="87" To="88" Label="Source1" />
+      <Edge From="88" To="89" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
