@@ -15,7 +15,7 @@
 %
 % Returns:
 % --------
-% area, centroid, bouding box, and orientation for key arena items:
+% area, centroid, bounding box, and orientation for key arena items:
 %   all_perches
 % 	perch_no_site (feeder perches)
 % 	perch_w_site (cache perches)
