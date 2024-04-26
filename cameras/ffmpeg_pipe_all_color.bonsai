@@ -1,0 +1,526 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WorkflowBuilder Version="2.7.1"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
+                 xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
+                 xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
+                 xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
+                 xmlns:ipy="clr-namespace:Bonsai.Scripting.IronPython;assembly=Bonsai.Scripting.IronPython"
+                 xmlns="https://bonsai-rx.org/2018/workflow">
+  <Workflow>
+    <Nodes>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637872</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:ImageWriter">
+          <cv:Path>\\.\pipe\bottom_video</cv:Path>
+          <cv:Suffix>None</cv:Suffix>
+          <cv:Overwrite>true</cv:Overwrite>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Slice">
+          <rx:Start>0</rx:Start>
+          <rx:Step>1500</rx:Step>
+          <rx:Stop xsi:nil="true" />
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\bottom_cam_sync.csv</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\botImages\.tiff</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:SaveImage">
+          <cv:FileName>Z:\Isabel\data\acquisition\test_gpu\botImages\.tiff</cv:FileName>
+          <cv:Suffix>Timestamp</cv:Suffix>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>ChunkData</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>FrameID</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Timestamp</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="io:CsvWriter">
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\bottom_cam_sync.csv</io:FileName>
+        <io:Append>false</io:Append>
+        <io:Overwrite>false</io:Overwrite>
+        <io:Suffix>None</io:Suffix>
+        <io:IncludeHeader>false</io:IncludeHeader>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>Z:\Isabel\data\acquisition</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Script>import os
+
+@returns(str)
+def process(base_path):
+  #base_path = "Z:\\Selmaan\\Acquisition"
+  all_path = os.listdir(base_path)
+  dir_times = [os.path.getmtime(os.path.join(base_path, fName)) for fName in all_path]
+  dir_ind = max((x,i) for i,x in enumerate(dir_times))[1]
+  path = os.path.join(base_path, all_path[dir_ind])
+  return path</ipy:Script>
+      </Expression>
+      <Expression xsi:type="rx:ReplaySubject">
+        <Name>basepath</Name>
+        <rx:BufferSize xsi:nil="true" />
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT1S</rx:DueTime>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Name>SaveBottomVideo</ipy:Name>
+        <ipy:Script>import os
+
+@returns(bool)
+def process(path):
+  fname = os.path.join(path, "bottom_cam.avi")
+  pipename = r'\\.\pipe\bottom_video'
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1600x1600 -r 25 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 800x800 -r 25 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 800x800 -r 25 -pix_fmt gray8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 34 {1}', pipename, fname))
+  return True</ipy:Script>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22417280</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:ImageWriter">
+          <cv:Path>\\.\pipe\red_video</cv:Path>
+          <cv:Suffix>None</cv:Suffix>
+          <cv:Overwrite>true</cv:Overwrite>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>ChunkData</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>FrameID</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Timestamp</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\red_cam_sync.csv</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="io:CsvWriter">
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\red_cam_sync.csv</io:FileName>
+        <io:Append>false</io:Append>
+        <io:Overwrite>false</io:Overwrite>
+        <io:Suffix>None</io:Suffix>
+        <io:IncludeHeader>false</io:IncludeHeader>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT1S</rx:DueTime>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Name>SaveRedVideo</ipy:Name>
+        <ipy:Script>import os
+
+@returns(bool)
+def process(path):
+  fname = os.path.join(path, "red_cam.avi")
+  pipename = r'\\.\pipe\red_video'
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt bayer_rggb8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
+  return True</ipy:Script>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637867</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:ImageWriter">
+          <cv:Path>\\.\pipe\blue_video</cv:Path>
+          <cv:Suffix>None</cv:Suffix>
+          <cv:Overwrite>true</cv:Overwrite>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>ChunkData</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>FrameID</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Timestamp</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\blue_cam_sync.csv</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="io:CsvWriter">
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\blue_cam_sync.csv</io:FileName>
+        <io:Append>false</io:Append>
+        <io:Overwrite>false</io:Overwrite>
+        <io:Suffix>None</io:Suffix>
+        <io:IncludeHeader>false</io:IncludeHeader>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT1S</rx:DueTime>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Name>SaveBlueVideo</ipy:Name>
+        <ipy:Script>import os
+
+@returns(bool)
+def process(path):
+  fname = os.path.join(path, "blue_cam.avi")
+  pipename = r'\\.\pipe\blue_video'
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt bayer_rggb8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
+  return True</ipy:Script>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637874</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:ImageWriter">
+          <cv:Path>\\.\pipe\green_video</cv:Path>
+          <cv:Suffix>None</cv:Suffix>
+          <cv:Overwrite>true</cv:Overwrite>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>ChunkData</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>FrameID</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Timestamp</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\green_cam_sync.csv</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="io:CsvWriter">
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\green_cam_sync.csv</io:FileName>
+        <io:Append>false</io:Append>
+        <io:Overwrite>false</io:Overwrite>
+        <io:Suffix>None</io:Suffix>
+        <io:IncludeHeader>false</io:IncludeHeader>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT1S</rx:DueTime>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Name>SaveGreenVideo</ipy:Name>
+        <ipy:Script>import os
+
+@returns(bool)
+def process(path):
+  fname = os.path.join(path, "green_cam.avi")
+  pipename = r'\\.\pipe\green_video'
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt bayer_rggb8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
+  return True</ipy:Script>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="spk:SpinnakerCapture">
+          <spk:Index xsi:nil="true" />
+          <spk:SerialNumber>22637871</spk:SerialNumber>
+          <spk:ColorProcessing>NoColorProcessing</spk:ColorProcessing>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Image</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="cv:ImageWriter">
+          <cv:Path>\\.\pipe\yellow_video</cv:Path>
+          <cv:Suffix>None</cv:Suffix>
+          <cv:Overwrite>true</cv:Overwrite>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>ChunkData</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>FrameID</Selector>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Timestamp</Selector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="StringProperty">
+          <Value>\yellow_cam_sync.csv</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Zip" />
+      </Expression>
+      <Expression xsi:type="Add" />
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="FileName" />
+        </PropertyMappings>
+      </Expression>
+      <Expression xsi:type="io:CsvWriter">
+        <io:FileName>Z:\Isabel\data\acquisition\test_gpu\yellow_cam_sync.csv</io:FileName>
+        <io:Append>false</io:Append>
+        <io:Overwrite>false</io:Overwrite>
+        <io:Suffix>None</io:Suffix>
+        <io:IncludeHeader>false</io:IncludeHeader>
+      </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>basepath</Name>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Delay">
+          <rx:DueTime>PT1S</rx:DueTime>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="ipy:PythonTransform">
+        <ipy:Name>SaveYellowVideo</ipy:Name>
+        <ipy:Script>import os
+
+@returns(bool)
+def process(path):
+  fname = os.path.join(path, "yellow_cam.avi")
+  pipename = r'\\.\pipe\yellow_video'
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 4096x2160 -r 32.23 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # default
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 3796x1250 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 1
+  #os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt gray8 -i {0} -vcodec libx264 -preset fast -qp 23 {1}', pipename, fname)) # user 0 - binned pixels
+  os.system(str.format(r'ffmpeg -y -f rawvideo -vcodec rawvideo -s 1896x640 -r 50 -pix_fmt bayer_rggb8 -i {0} -vcodec h264_nvenc -preset fast -rc constqp -qp 30 {1}', pipename, fname)) # attempt at gpu
+  return True</ipy:Script>
+      </Expression>
+    </Nodes>
+    <Edges>
+      <Edge From="0" To="1" Label="Source1" />
+      <Edge From="0" To="15" Label="Source1" />
+      <Edge From="1" To="2" Label="Source1" />
+      <Edge From="1" To="3" Label="Source1" />
+      <Edge From="3" To="14" Label="Source1" />
+      <Edge From="4" To="6" Label="Source2" />
+      <Edge From="5" To="6" Label="Source1" />
+      <Edge From="6" To="7" Label="Source1" />
+      <Edge From="7" To="8" Label="Source1" />
+      <Edge From="8" To="19" Label="Source2" />
+      <Edge From="9" To="11" Label="Source2" />
+      <Edge From="10" To="11" Label="Source1" />
+      <Edge From="11" To="12" Label="Source1" />
+      <Edge From="12" To="13" Label="Source1" />
+      <Edge From="13" To="14" Label="Source2" />
+      <Edge From="15" To="16" Label="Source1" />
+      <Edge From="15" To="17" Label="Source1" />
+      <Edge From="16" To="18" Label="Source1" />
+      <Edge From="17" To="18" Label="Source2" />
+      <Edge From="18" To="19" Label="Source1" />
+      <Edge From="20" To="21" Label="Source1" />
+      <Edge From="21" To="22" Label="Source1" />
+      <Edge From="23" To="24" Label="Source1" />
+      <Edge From="24" To="25" Label="Source1" />
+      <Edge From="26" To="27" Label="Source1" />
+      <Edge From="26" To="29" Label="Source1" />
+      <Edge From="27" To="28" Label="Source1" />
+      <Edge From="29" To="30" Label="Source1" />
+      <Edge From="29" To="31" Label="Source1" />
+      <Edge From="30" To="32" Label="Source1" />
+      <Edge From="31" To="32" Label="Source2" />
+      <Edge From="32" To="38" Label="Source1" />
+      <Edge From="33" To="35" Label="Source2" />
+      <Edge From="34" To="35" Label="Source1" />
+      <Edge From="35" To="36" Label="Source1" />
+      <Edge From="36" To="37" Label="Source1" />
+      <Edge From="37" To="38" Label="Source2" />
+      <Edge From="39" To="40" Label="Source1" />
+      <Edge From="40" To="41" Label="Source1" />
+      <Edge From="42" To="43" Label="Source1" />
+      <Edge From="42" To="45" Label="Source1" />
+      <Edge From="43" To="44" Label="Source1" />
+      <Edge From="45" To="46" Label="Source1" />
+      <Edge From="45" To="47" Label="Source1" />
+      <Edge From="46" To="48" Label="Source1" />
+      <Edge From="47" To="48" Label="Source2" />
+      <Edge From="48" To="54" Label="Source1" />
+      <Edge From="49" To="51" Label="Source2" />
+      <Edge From="50" To="51" Label="Source1" />
+      <Edge From="51" To="52" Label="Source1" />
+      <Edge From="52" To="53" Label="Source1" />
+      <Edge From="53" To="54" Label="Source2" />
+      <Edge From="55" To="56" Label="Source1" />
+      <Edge From="56" To="57" Label="Source1" />
+      <Edge From="58" To="59" Label="Source1" />
+      <Edge From="58" To="61" Label="Source1" />
+      <Edge From="59" To="60" Label="Source1" />
+      <Edge From="61" To="62" Label="Source1" />
+      <Edge From="61" To="63" Label="Source1" />
+      <Edge From="62" To="64" Label="Source1" />
+      <Edge From="63" To="64" Label="Source2" />
+      <Edge From="64" To="70" Label="Source1" />
+      <Edge From="65" To="67" Label="Source2" />
+      <Edge From="66" To="67" Label="Source1" />
+      <Edge From="67" To="68" Label="Source1" />
+      <Edge From="68" To="69" Label="Source1" />
+      <Edge From="69" To="70" Label="Source2" />
+      <Edge From="71" To="72" Label="Source1" />
+      <Edge From="72" To="73" Label="Source1" />
+      <Edge From="74" To="75" Label="Source1" />
+      <Edge From="74" To="77" Label="Source1" />
+      <Edge From="75" To="76" Label="Source1" />
+      <Edge From="77" To="78" Label="Source1" />
+      <Edge From="77" To="79" Label="Source1" />
+      <Edge From="78" To="80" Label="Source1" />
+      <Edge From="79" To="80" Label="Source2" />
+      <Edge From="80" To="86" Label="Source1" />
+      <Edge From="81" To="83" Label="Source2" />
+      <Edge From="82" To="83" Label="Source1" />
+      <Edge From="83" To="84" Label="Source1" />
+      <Edge From="84" To="85" Label="Source1" />
+      <Edge From="85" To="86" Label="Source2" />
+      <Edge From="87" To="88" Label="Source1" />
+      <Edge From="88" To="89" Label="Source1" />
+    </Edges>
+  </Workflow>
+</WorkflowBuilder>
