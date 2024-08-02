@@ -78,12 +78,20 @@ labelGui = Label3D(allParams, videos, skeleton, 'defScale', .06);
 colormap(labelGui.h{1}.Parent, 'gray'),
 
 %% store the value, camera, and point index for each point
-frame_idx = labelGui.frame;
-
 % get the 3D point locations
 points_3d = labelGui.points3D(:, :, frame_idx);
 
 % get the 2D point locations
+frame_idx = labelGui.frame;
+
+% note! these points are undistorted
+% key_pts = labelGui.camPoints(:, :, :, frame_idx); 
+
+% note! these points include distortion (I think?), but will be NaN if the point is
+% not touched in the GUI on that camera view...
+key_pts = labelGui.handLabeled2D(:, :, :, 1);
+
+% another possible method for getting the 2D point locations
 for cam_idx = 1:nCams
     thisParam = labelGui.cameraParams{cam_idx};
     thisRot = thisParam.RotationMatrices;
@@ -97,21 +105,24 @@ for cam_idx = 1:nCams
     end
 end
 
-% get the camera and point indices
-n_pts = size(points_3d, 1);
-pt_idx = 1:n_pts;
+n_pts = size(key_pts, 1);
+
+pt_idx = 1:9;
 for i = 1:nCams
     cam = camNames(i);
+    pts = squeeze(key_pts(:, i, :));
     if i == 1
         camera_ind = ones(1, n_pts) * i;
         point_ind = pt_idx;
+%         points_2d = pts;
     else
         camera_ind = [camera_ind, ones(1, n_pts) * i];
         point_ind = [point_ind, pt_idx];
+%         points_2d = [points_2d; pts];
     end
 end
 
-% adjust for pythonic indexing
+% optionally adjust for pythonic indexing
 camera_ind = camera_ind - 1;
 point_ind = point_ind - 1;
 
