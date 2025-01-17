@@ -1,6 +1,7 @@
 %% Load in Diego Aldorondo's labeling GUI and label the key points:
 % lightly modified from SC's script:
 % RigControl/Camera Alignments/arena_coordinate_transform_2.m
+% linear transform code based on DA's pointer Alignment script
 
 % label: feeder centers, water dish corners, center point
 
@@ -12,14 +13,14 @@ codePath = 'C:\Users\ilow1\Documents\code\Label3D';
 addpath(genpath(codePath))
 
 alignPath = 'C:\Users\ilow1\Documents\code\il_rig_control\camera_alignment\';
-cam_array_file = '240802_opt_cam_array.mat';
+cam_array_file = '240910_opt_cam_array.mat';
 load(fullfile(alignPath, cam_array_file))
 
-calib_img_date = '240719';
+calib_img_date = '240507';
 imgRoot = 'Z:\Isabel\arena\camera_calibration_files\';
 imgFolder = [calib_img_date, '_calibration_videos_key_pts'];
-% imgRoot = 'Z:\Isabel\data\behavior\AMB10\';
-% imgFolder = ['AMB10_', calib_img_date];
+% imgRoot = 'Z:\Isabel\data\hpc_implants\PRL73\';
+% imgFolder = ['PRL73_', calib_img_date];
 imgPath = fullfile(imgRoot, imgFolder);
 
 % for saving key points etc.
@@ -29,11 +30,16 @@ save_point_ind = [calib_img_date, '_point_ind.npy'];
 save_points_2d = [calib_img_date, '_points_2d.npy'];
 save_points_3d = [calib_img_date, '_points_3d.npy'];
 
-% data params
+% to get the world coordinates of the known points
+known_pts_path = 'C:\Users\ilow1\Documents\code\bird_pose_tracking\calibration_files\known_points\';
+known_pts_file = 'pts_3d_known.mat';
+load(fullfile(known_pts_path, known_pts_file))
+
+%% data params
 camNames = {'red_cam', 'yellow_cam', 'green_cam', 'blue_cam'};
 nFrames = 5;
 nCams = length(camNames);
-frame_idx = round(linspace(1, 420, nFrames));
+frame_idx = round(linspace(1, 45, nFrames));
 
 % read in and reformat camera array
 allParams = cell(nCams,1);
@@ -59,7 +65,8 @@ for cam_idx = 1:nCams
     img = imread(thisFile);
     vid = zeros(size(img, 1), size(img, 2), 1, nFrames, 'uint8');
     for f = 1:nFrames
-        thisFile = fullfile(allImages(f).folder, allImages(f).name);
+        f_idx = frame_idx(f);
+        thisFile = fullfile(allImages(f_idx).folder, allImages(f_idx).name);
         img = imread(thisFile);
         vid(:,:,f) = img(:, :, 1);
     end
@@ -77,11 +84,15 @@ skeleton.joints_idx = repmat(cat(1, [2, 3], [3, 4], [4, 5], [5, 2],...
 labelGui = Label3D(allParams, videos, skeleton, 'defScale', .06);
 colormap(labelGui.h{1}.Parent, 'gray'),
 
+%% Load Label3D object from previous session
+labelGui = Label3D('20240806_161801_Label3D.mat', videos);
+colormap(labelGui.h{1}.Parent, 'gray'),
+
 %% store the value, camera, and point index for each point
-frame_idx = labelGui.frame;
+n_frame = labelGui.frame;
 
 % get the 3D point locations
-points_3d = labelGui.points3D(:, :, frame_idx);
+points_3d = labelGui.points3D(:, :, n_frame);
 
 % get the 2D point locations
 for cam_idx = 1:nCams

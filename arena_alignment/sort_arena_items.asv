@@ -15,7 +15,7 @@
 %
 % Returns:
 % --------
-% area, centroid, convex hull, and orientation for key arena items:
+% area, centroid, bounding box, and orientation for key arena items:
 %   all_perches
 % 	perch_no_site (feeder perches)
 % 	perch_w_site (cache perches)
@@ -33,39 +33,17 @@ load(data_dir + "ref_obj.mat");
 % find all the arena items (white areas in image)
 stats = regionprops(arena_model > 0.5,...
                     'Area', 'Centroid',...
-                    'ConvexHull', 'Orientation');
+                    'BoundingBox', 'Orientation');
 
-% sort arena items by area
+% perches and caches - larger than screws, smaller than dishes
 perches = stats([stats.Area] > 2e5 & [stats.Area] < 9e5);
 caches = stats([stats.Area] > 6e4 & [stats.Area] < 2e5);
 n_caches = length(caches);
+
+% feeders and water dish
 feeders = stats([stats.Area] > 4e6);
 water_dish = stats([stats.Area] > 9e5 & [stats.Area] < 4e6);
 n_feeders = length(feeders);
-
-%% convert to normalized coordinates
-for i=1:length(perches)
-    [perches(i).Centroid(1), perches(i).Centroid(2)] = arena_ref.intrinsicToWorld(...
-        perches(i).Centroid(1),perches(i).Centroid(2));
-    [perches(i).ConvexHull(:,1), perches(i).ConvexHull(:,2)] = arena_ref.intrinsicToWorld(...
-        perches(i).ConvexHull(:,1),perches(i).ConvexHull(:,2));
-end
-for i=1:n_caches
-    [caches(i).Centroid(1), caches(i).Centroid(2)] = arena_ref.intrinsicToWorld(...
-         caches(i).Centroid(1), caches(i).Centroid(2));
-    [caches(i).ConvexHull(:,1), caches(i).ConvexHull(:,2)] = arena_ref.intrinsicToWorld(...
-         caches(i).ConvexHull(:,1), caches(i).ConvexHull(:,2));
-end
-for i=1:n_feeders
-    [feeders(i).Centroid(1), feeders(i).Centroid(2)] = arena_ref.intrinsicToWorld(...
-         feeders(i).Centroid(1), feeders(i).Centroid(2));
-    [feeders(i).ConvexHull(:,1), feeders(i).ConvexHull(:,2)] = arena_ref.intrinsicToWorld(...
-         feeders(i).ConvexHull(:,1), feeders(i).ConvexHull(:,2));
-end
-[water_dish.Centroid(1), water_dish.Centroid(2)] = arena_ref.intrinsicToWorld(...
-     water_dish.Centroid(1), water_dish.Centroid(2));
-[water_dish.ConvexHull(:,1), water_dish.ConvexHull(:,2)] = arena_ref.intrinsicToWorld(...
-     water_dish.ConvexHull(:,1), water_dish.ConvexHull(:,2));
 
 %% identify feeder perches vs. cache perches
 feeder_perches = abs(abs([perches.Orientation])-45)<2;
@@ -75,7 +53,25 @@ assert(length(perch_w_site) == n_caches,...
         "error: " + length(perch_w_site) + " perches for "...
         + n_caches + " caches!");
 
-%% sort to pair each perch with its cache site
+%% organize perches and caches
+% convert to normalized coords, reformat bounding boxes
+for i=1:n_caches
+    perch_w_site(i).Centroid = perch_w_site(i).Centroid *...
+        arena_ref.PixelExtentInWorldX-1;
+    old_box = perch_w_site(i).BoundingBox;
+    old_box(3:4) = old_box(1:2)+old_box(3:4);
+    perch_w_site(i).BoundingBox = reshape(old_box,...
+        [2,2])' * arena_ref.PixelExtentInWorldX-1;
+    
+    caches(i).Centroid = caches(i).Centroid *...
+        arena_ref.PixelExtentInWorldX-1;
+    old_box = caches(i).BoundingBox;
+    old_box(3:4) = old_box(1:2)+old_box(3:4);
+    caches(i).BoundingBox = reshape(old_box,...
+        [2,2])' * arena_ref.PixelExtentInWorldX-1;
+end
+
+% sort to pair each perch with its cache site
 perch_centers = cat(1, perch_w_site.Centroid);
 cache_centers = cat(1, caches.Centroid);
 h = histogram(cache_centers(:, 1), 11);
@@ -106,10 +102,35 @@ cache_centers = cat(1, caches.Centroid);
 fprintf('\n found %d improper perch-cache matches \n', ...
         sum(sqrt(sum((perch_centers - cache_centers).^2, 2)) > .05))
 
-%% pair each feeder perch with its feeder
-% feeder_perches = perch_no_site([1, 2, 3, 4]); % manually re-arrange to pair feeder and perch
+%% organize feeders and feeder perches
+% convert to normalized coords, reformat bounding boxes
+for i=1:n_feeders
+    perch_no_site(i).Centroid = perch_no_site(i).Centroid *...
+        arena_ref.PixelExtentInWorldX-1;
+    old_box = perch_no_site(i).BoundingBox;
+    old_box(3:4) = old_box(1:2)+old_box(3:4);
+    perch_no_site(i).BoundingBox = reshape(old_box,...
+        [2,2])' * arena_ref.PixelExtentInWorldX-1;
+    
+    feeders(i).Centroid = feeders(i).Centroid *...
+        arena_ref.PixelExtentInWorldX-1;
+    old_box = feeders(i).BoundingBox;
+    old_box(3:4) = old_box(1:2)+old_box(3:4);
+    feeders(i).BoundingBox = reshape(old_box,...
+        [2,2])' * arena_ref.PixelExtentInWorldX-1;
+end
+
+% pair each perch with its feeder
+% perch_no_site = perch_no_site([1, 2, 3, 4]); % manually re-arrange to pair feeder and perch
 fprintf('\n found %d improper perch-feeder matches \n', ...
     sum(sqrt(sum((cat(1, perch_no_site.Centroid) - cat(1, feeders.Centroid)).^2,2))>.2)),
+
+% normalize and reformat water dish coords
+water_dish.Centroid = water_dish.Centroid * arena_ref.PixelExtentInWorldX-1;
+old_box = water_dish.BoundingBox;
+old_box(3:4) = old_box(1:2)+old_box(3:4);
+water_dish.BoundingBox = reshape(old_box,...
+    [2,2])' * arena_ref.PixelExtentInWorldX-1;
 
 %% plot to check alignment
 figure,imshow(arena_model, arena_ref)
@@ -122,6 +143,6 @@ plot(water_dish.Centroid(1), water_dish.Centroid(2),'*'),
 
 %% save everything
 all_perches = cat(1, perch_w_site, perch_no_site);
-save(data_dir + "arena_items_2.mat", ...
+save(data_dir + "arena_items.mat", ...
         "all_perches", "perch_no_site", "perch_w_site",...
             "caches", "feeders", "water_dish")
